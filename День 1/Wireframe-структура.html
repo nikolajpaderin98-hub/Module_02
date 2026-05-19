@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MES AgroControl | Wireframe Prototype</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --surface: #fff; --text: #1f2937;
+    --primary: #0f766e; --success: #059669; --warning: #d97706; --danger: #dc2626;
+    --radius: 8px; --shadow: 0 2px 6px rgba(0,0,0,0.1);
+    --touch: 48px; /* Минимальный размер для сенсоров */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+  body { background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 40px; }
+  
+  header { background: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 10; }
+  .role-switcher { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: var(--radius); font-size: 14px; }
+  
+  main { max-width: 1200px; margin: 16px auto; padding: 0 12px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  
+  /* Dashboard Pipeline */
+  .pipeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 12px; }
+  .column { background: #e5e7eb; border-radius: var(--radius); padding: 12px; min-height: 300px; }
+  .column h3 { margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card { background: var(--surface); padding: 12px; border-radius: var(--radius); margin-bottom: 10px; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.2s; }
+  .card:hover { transform: translateY(-2px); }
+  .card .meta { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .progress { height: 6px; background: #e5e7eb; border-radius: 3px; margin: 8px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+  
+  /* Operator Console */
+  .split { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; min-height: 500px; }
+  .nav-panel { background: var(--surface); padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow); }
+  .step-list { list-style: none; margin-top: 12px; }
+  .step-list li { padding: 12px; border-left: 3px solid #e5e7eb; margin-bottom: 4px; cursor: default; }
+  .step-list li.done { border-color: var(--success); opacity: 0.7; }
+  .step-list li.active { border-color: var(--warning); background: #fef3c7; font-weight: 600; }
+  .step-list li.locked { border-color: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+  
+  .input-panel { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); display: grid; gap: 16px; }
+  .param { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: center; padding: 12px; background: #f9fafb; border-radius: var(--radius); }
+  .param input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px; }
+  .param input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,118,110,0.2); }
+  .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .badge.ok { background: #d1fae5; color: #065f46; }
+  .badge.warn { background: #fee2e2; color: #991b1b; }
+  
+  .actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  button { padding: 12px 20px; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; min-height: var(--touch); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-outline { background: transparent; border: 1px solid #d1d5db; }
+  
+  /* Deviation Review */
+  .review-card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; border-left: 4px solid var(--warning); }
+  .review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  textarea { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; min-height: 80px; }
+  
+  @media (max-width: 768px) {
+    .split { grid-template-columns: 1fr; }
+    .param { grid-template-columns: 1fr; }
+    .review-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div><strong>MES AgroControl</strong> <span style="font-weight:400;color:#6b7280">| Wireframe v2</span></div>
+  <select class="role-switcher" id="roleSwitch">
+    <option value="operator">👷 Оператор</option>
+    <option value="supervisor">👔 Начальник смены</option>
+    <option value="technologist">🧪 Технолог</option>
+  </select>
+</header>
+
+<main>
+  <!-- ЭКРАН 1: КОНВЕЙЕР ЗАКАЗОВ -->
+  <section id="dashboard" class="screen active">
+    <h2>📊 Конвейер заказов</h2>
+    <div class="pipeline">
+      <div class="column"><h3>🟦 PLANNED (2)</h3>
+        <div class="card" onclick="showScreen('operator')">PO-2403 <div class="meta">Гербицид А v2 | 2000 кг</div></div>
+        <div class="card">PO-2410 <div class="meta">Инсектицид Б v2 | 2500 кг</div></div>
+      </div>
+      <div class="column"><h3>🟡 IN PROGRESS (3)</h3>
+        <div class="card" onclick="showScreen('operator')">PO-2402 <div class="meta">Инсектицид Б v2 | 65%</div>
+          <div class="progress"><div class="progress-fill" style="width:65%"></div></div></div>
+        <div class="card">PO-2413 <div class="meta">Гербицид А v2 | 40%</div>
+          <div class="progress"><div class="progress-fill" style="width:40%"></div></div></div>
+        <div class="card">PO-2417 <div class="meta">Фунгицид Л v1 | 28%</div>
+          <div class="progress"><div class="progress-fill" style="width:28%"></div></div></div>
+      </div>
+      <div class="column"><h3>✅ COMPLETED (4)</h3>
+        <div class="card">PO-2401 <div class="meta">Гербицид А v1 | 1000 кг</div></div>
+        <div class="card">PO-2405 <div class="meta">Инсектицид Б v1 | 300 кг</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ЭКРАН 2: КОНСОЛЬ ОПЕРАТОРА -->
+  <section id="operator" class="screen">
+    <h2>📦 Исполнение шага | PO-2402</h2>
+    <div class="split">
+      <div class="nav-panel">
+        <h3>📋 Ход выполнения</h3>
+        <ul class="step-list">
+          <li class="done">✅ 1. Смешивание</li>
+          <li class="active">🟡 2. Выдержка (текущий)</li>
+          <li class="locked">🔒 3. Экструзия</li>
+          <li class="locked">🔒 4. Охлаждение</li>
+        </ul>
+        <p style="margin-top:16px;font-size:13px;color:#6b7280">💡 При T > 62°C → автозапрос технолога</p>
+      </div>
+      <div class="input-panel">
+        <div class="param">
+          <span>🌡 Температура</span><span>План: 60°C</span>
+          <input type="number" value="59.8" step="0.1" aria-label="Фактическая температура">
+          <span class="badge ok">В допуске</span>
+        </div>
+        <div class="param">
+          <span>⏱ Длительность</span><span>План: 120 мин</span>
+          <input type="number" value="118" aria-label="Фактическая длительность">
+          <span class="badge ok">В допуске</span>
+        </div>
+        <div class="param">
+          <span>🔽 Давление</span><span>План: 2.0 бар</span>
+          <input type="number" value="1.95" step="0.01" aria-label="Фактическое давление">
+          <span class="badge ok">В допуске</span>
+        </div>
+        <textarea placeholder="📝 Комментарий оператора (обязательно при отклонении)"></textarea>
+        <div class="actions">
+          <button class="btn-primary" onclick="alert('✅ Шаг сохранён. Переход к следующему.')">✅ Завершить шаг</button>
+          <button class="btn-outline" onclick="showScreen('deviations')">⚠️ Сообщить об отклонении</button>
+          <button class="btn-danger">🛑 Аварийная остановка</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ЭКРАН 3: СОГЛАСОВАНИЕ ОТКЛОНЕНИЙ -->
+  <section id="deviations" class="screen">
+    <h2>🔍 Журнал отклонений | Требует решения</h2>
+    <div class="review-card">
+      <h3>Шаг 3: Экструзия | Заказ PO-2402</h3>
+      <div class="review-grid">
+        <div>🌡 План: 80°C | Факт: <strong>78.2°C</strong></div>
+        <div>🔽 План: 3.0 бар | Факт: <strong>2.8 бар</strong></div>
+        <div>👤 Оператор: Заводов С.Н.</div>
+        <div>⏰ Зафиксировано: 14:32</div>
+      </div>
+      <p>💬 <em>«Температура ниже нормы. Датчик калиброван вчера, возможно засорение форсунки.»</em></p>
+      <hr style="margin:12px 0; border:0; border-top:1px solid #e5e7eb;">
+      <h4>Решение технолога:</h4>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;">
+        <button class="btn-primary">✅ Принять без корректировки</button>
+        <button class="btn-outline">🔄 Требовать повторный замер</button>
+        <button class="btn-danger">🛑 Остановить партию</button>
+      </div>
+      <textarea placeholder="Обоснование решения (обязательно для аудита)"></textarea>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Навигация
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  
+  // Симуляция роли
+  document.getElementById('roleSwitch').addEventListener('change', e => {
+    const role = e.target.value;
+    if(role === 'operator') showScreen('operator');
+    else if(role === 'supervisor') showScreen('dashboard');
+    else if(role === 'technologist') showScreen('deviations');
+  });
+
+  // Валидация на лету
+  document.querySelectorAll('input[type="number"]').forEach(inp => {
+    inp.addEventListener('input', function() {
+      const val = parseFloat(this.value);
+      const badge = this.parentElement.querySelector('.badge');
+      if(isNaN(val)) return;
+      // Демо-правило: температура 58-62 = ок, иначе предупреждение
+      if(this.ariaLabel.includes('Температура')) {
+        if(val >= 58 && val <= 62) { badge.className = 'badge ok'; badge.textContent = 'В допуске'; }
+        else { badge.className = 'badge warn'; badge.textContent = '⚠️ Отклонение'; }
+      }
+    });
+  });
+</script>
+</body>
+</html>
